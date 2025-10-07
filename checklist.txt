@@ -1,0 +1,11 @@
+Example Plex TheMovieDB Custom Metadata Provider
+
+A typescript-based NodeJS project providing an HTTP API for Plex-compatible Media Provider utilizing metadata from TheMovieDB.org, using Axios for outbound requests.
+
+Steps:
+1. Define the MediaProvider model (detailed inside "docs/MediaProvider.md")
+2. Write unit tests validating the MediaProvider model.
+3. Define the MetadataItem model (detailed inside "docs/Metadata.md")
+4. Write unit tests validating the Metadata model, including tests for specific metadata types.
+5. Set up the API for the Features defined by the MediaProvider (detailed inside "docs/API Endpoints.md")
+6. Utilize the markdown files inside the "docs" path to write OpenAPI-compatible documentation for the API implementation.
