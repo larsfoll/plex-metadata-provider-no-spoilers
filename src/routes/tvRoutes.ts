@@ -2,12 +2,12 @@
  * TV Provider Routes
  */
 
-import { Router, Request, Response } from 'express';
-import { getTVProviderResponse } from '../providers/TVProvider';
-import { MatchService, MatchRequest } from '../services/MatchService';
-import { MetadataService } from '../services/MetadataService';
-import { config } from '../config/env';
-import { API_PATHS } from '../constants';
+import { Router, Request, Response } from "express";
+import { getTVProviderResponse } from "../providers/TVProvider";
+import { MatchService, MatchRequest } from "../services/MatchService";
+import { MetadataService } from "../services/MetadataService";
+import { config } from "../config/env";
+import { API_PATHS } from "../constants";
 
 const router = Router();
 
@@ -66,7 +66,7 @@ function getMetadataService(): MetadataService {
  *                       items:
  *                         type: object
  */
-router.get('/', (_req: Request, res: Response) => {
+router.get("/", (_req: Request, res: Response) => {
   const providerResponse = getTVProviderResponse();
   res.json(providerResponse);
 });
@@ -135,28 +135,32 @@ router.get('/', (_req: Request, res: Response) => {
  *       500:
  *         description: Internal server error
  */
-router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey/images`, async (req: Request, res: Response) => {
-  try {
-    const { ratingKey } = req.params;
+router.get(
+  `${API_PATHS.LIBRARY_METADATA}/:ratingKey/images`,
+  async (req: Request, res: Response) => {
+    try {
+      const { ratingKey } = req.params;
 
-    // Get language from headers or query params
-    const language = (req.headers['x-plex-language'] as string) ||
-                    (req.query['X-Plex-Language'] as string) ||
-                    'en-US';
+      // Get language from headers or query params
+      const language =
+        (req.headers["x-plex-language"] as string) ||
+        (req.query["X-Plex-Language"] as string) ||
+        "en-US";
 
-    // Get images
-    const service = getMetadataService();
-    const result = await service.getImages(ratingKey, { language });
+      // Get images
+      const service = getMetadataService();
+      const result = await service.getImages(ratingKey, { language });
 
-    res.json(result);
-  } catch (error) {
-    console.error('Images error:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
+      res.json(result);
+    } catch (error) {
+      console.error("Images error:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
 
 /**
  * @openapi
@@ -227,37 +231,42 @@ router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey/images`, async (req: Reques
  *       500:
  *         description: Internal server error
  */
-router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey`, async (req: Request, res: Response) => {
-  try {
-    const { ratingKey } = req.params;
+router.get(
+  `${API_PATHS.LIBRARY_METADATA}/:ratingKey`,
+  async (req: Request, res: Response) => {
+    try {
+      const { ratingKey } = req.params;
 
-    // Get language and country from headers or query params
-    const language = (req.headers['x-plex-language'] as string) ||
-                    (req.query['X-Plex-Language'] as string) ||
-                    'en-US';
-    const country = (req.headers['x-plex-country'] as string) ||
-                   (req.query['X-Plex-Country'] as string) ||
-                   'US';
-    const includeChildren = req.query.includeChildren === '1';
-    const episodeOrder = req.query.episodeOrder as string | undefined;
+      // Get language and country from headers or query params
+      const language =
+        (req.headers["x-plex-language"] as string) ||
+        (req.query["X-Plex-Language"] as string) ||
+        "en-US";
+      const country =
+        (req.headers["x-plex-country"] as string) ||
+        (req.query["X-Plex-Country"] as string) ||
+        "US";
+      const includeChildren = req.query.includeChildren === "1";
+      const episodeOrder = req.query.episodeOrder as string | undefined;
 
-    // Get metadata
-    const service = getMetadataService();
-    const result = await service.getMetadata(ratingKey, {
-      language,
-      country,
-      includeChildren,
-      episodeOrder,
-    });
+      // Get metadata
+      const service = getMetadataService();
+      const result = await service.getMetadata(ratingKey, {
+        language,
+        country,
+        includeChildren,
+        episodeOrder,
+      });
 
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
 
 /**
  * @openapi
@@ -331,50 +340,55 @@ router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey`, async (req: Request, res:
  *       500:
  *         description: Internal server error
  */
-router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey/children`, async (req: Request, res: Response) => {
-  try {
-    const { ratingKey } = req.params;
+router.get(
+  `${API_PATHS.LIBRARY_METADATA}/:ratingKey/children`,
+  async (req: Request, res: Response) => {
+    try {
+      const { ratingKey } = req.params;
 
-    // Get language and country from headers or query params
-    const language = (req.headers['x-plex-language'] as string) ||
-                    (req.query['X-Plex-Language'] as string) ||
-                    'en-US';
-    const country = (req.headers['x-plex-country'] as string) ||
-                   (req.query['X-Plex-Country'] as string) ||
-                   'US';
-    const episodeOrder = req.query.episodeOrder as string | undefined;
+      // Get language and country from headers or query params
+      const language =
+        (req.headers["x-plex-language"] as string) ||
+        (req.query["X-Plex-Language"] as string) ||
+        "en-US";
+      const country =
+        (req.headers["x-plex-country"] as string) ||
+        (req.query["X-Plex-Country"] as string) ||
+        "US";
+      const episodeOrder = req.query.episodeOrder as string | undefined;
 
-    // Get paging parameters (default: size=20, start=1)
-    const containerSize = parseInt(
-      (req.headers['x-plex-container-size'] as string) ||
-      (req.query['X-Plex-Container-Size'] as string) ||
-      '20',
-      10
-    );
-    const containerStart = parseInt(
-      (req.headers['x-plex-container-start'] as string) ||
-      (req.query['X-Plex-Container-Start'] as string) ||
-      '1',
-      10
-    );
+      // Get paging parameters (default: size=20, start=1)
+      const containerSize = parseInt(
+        (req.headers["x-plex-container-size"] as string) ||
+          (req.query["X-Plex-Container-Size"] as string) ||
+          "20",
+        10,
+      );
+      const containerStart = parseInt(
+        (req.headers["x-plex-container-start"] as string) ||
+          (req.query["X-Plex-Container-Start"] as string) ||
+          "1",
+        10,
+      );
 
-    // Get children
-    const service = getMetadataService();
-    const result = await service.getChildren(
-      ratingKey,
-      { language, country, episodeOrder },
-      { containerSize, containerStart }
-    );
+      // Get children
+      const service = getMetadataService();
+      const result = await service.getChildren(
+        ratingKey,
+        { language, country, episodeOrder },
+        { containerSize, containerStart },
+      );
 
-    res.json(result);
-  } catch (error) {
-    console.error('Children error:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
+      res.json(result);
+    } catch (error) {
+      console.error("Children error:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
 
 /**
  * @openapi
@@ -445,49 +459,54 @@ router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey/children`, async (req: Requ
  *       500:
  *         description: Internal server error
  */
-router.get(`${API_PATHS.LIBRARY_METADATA}/:ratingKey/grandchildren`, async (req: Request, res: Response) => {
-  try {
-    const { ratingKey } = req.params;
+router.get(
+  `${API_PATHS.LIBRARY_METADATA}/:ratingKey/grandchildren`,
+  async (req: Request, res: Response) => {
+    try {
+      const { ratingKey } = req.params;
 
-    // Get language and country from headers or query params
-    const language = (req.headers['x-plex-language'] as string) ||
-                    (req.query['X-Plex-Language'] as string) ||
-                    'en-US';
-    const country = (req.headers['x-plex-country'] as string) ||
-                   (req.query['X-Plex-Country'] as string) ||
-                   'US';
+      // Get language and country from headers or query params
+      const language =
+        (req.headers["x-plex-language"] as string) ||
+        (req.query["X-Plex-Language"] as string) ||
+        "en-US";
+      const country =
+        (req.headers["x-plex-country"] as string) ||
+        (req.query["X-Plex-Country"] as string) ||
+        "US";
 
-    // Get paging parameters (default: size=20, start=1)
-    const containerSize = parseInt(
-      (req.headers['x-plex-container-size'] as string) ||
-      (req.query['X-Plex-Container-Size'] as string) ||
-      '20',
-      10
-    );
-    const containerStart = parseInt(
-      (req.headers['x-plex-container-start'] as string) ||
-      (req.query['X-Plex-Container-Start'] as string) ||
-      '1',
-      10
-    );
+      // Get paging parameters (default: size=20, start=1)
+      const containerSize = parseInt(
+        (req.headers["x-plex-container-size"] as string) ||
+          (req.query["X-Plex-Container-Size"] as string) ||
+          "20",
+        10,
+      );
+      const containerStart = parseInt(
+        (req.headers["x-plex-container-start"] as string) ||
+          (req.query["X-Plex-Container-Start"] as string) ||
+          "1",
+        10,
+      );
 
-    // Get grandchildren
-    const service = getMetadataService();
-    const result = await service.getGrandchildren(
-      ratingKey,
-      { language, country },
-      { containerSize, containerStart }
-    );
+      // Get grandchildren
+      const service = getMetadataService();
+      const result = await service.getGrandchildren(
+        ratingKey,
+        { language, country },
+        { containerSize, containerStart },
+      );
 
-    res.json(result);
-  } catch (error) {
-    console.error('Grandchildren error:', error);
-    res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
-  }
-});
+      res.json(result);
+    } catch (error) {
+      console.error("Grandchildren error:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
 
 /**
  * @openapi
@@ -618,12 +637,14 @@ router.post(API_PATHS.LIBRARY_MATCHES, async (req: Request, res: Response) => {
     const matchRequest: MatchRequest = req.body;
 
     // Get language and country from headers or query params
-    const language = (req.headers['x-plex-language'] as string) ||
-                    (req.query['X-Plex-Language'] as string) ||
-                    'en-US';
-    const country = (req.headers['x-plex-country'] as string) ||
-                   (req.query['X-Plex-Country'] as string) ||
-                   'US';
+    const language =
+      (req.headers["x-plex-language"] as string) ||
+      (req.query["X-Plex-Language"] as string) ||
+      "en-US";
+    const country =
+      (req.headers["x-plex-country"] as string) ||
+      (req.query["X-Plex-Country"] as string) ||
+      "US";
 
     // Perform the match
     const service = getMatchService();
@@ -631,10 +652,10 @@ router.post(API_PATHS.LIBRARY_MATCHES, async (req: Request, res: Response) => {
 
     res.json(result);
   } catch (error) {
-    console.error('Match error:', error);
+    console.error("Match error:", error);
     res.status(500).json({
-      error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error',
+      error: "Internal server error",
+      message: error instanceof Error ? error.message : "Unknown error",
     });
   }
 });

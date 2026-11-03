@@ -6,7 +6,7 @@
 /**
  * Metadata type strings
  */
-export type MetadataTypeString = 'movie' | 'show' | 'season' | 'episode';
+export type MetadataTypeString = "movie" | "show" | "season" | "episode";
 
 /**
  * Core attributes applicable to all metadata types
@@ -74,7 +74,12 @@ export interface WithGrandparent {
  * Image asset
  */
 export interface Image {
-  type: 'background' | 'backgroundSquare' | 'clearLogo' | 'coverPoster' | 'snapshot';
+  type:
+    | "background"
+    | "backgroundSquare"
+    | "clearLogo"
+    | "coverPoster"
+    | "snapshot";
   url: string;
   alt?: string;
 }
@@ -143,7 +148,7 @@ export interface Studio {
  */
 export interface Rating {
   image: string; // Image identifier (e.g., "imdb://image.rating")
-  type: 'audience' | 'critic';
+  type: "audience" | "critic";
   value: number; // Float between 0 and 10
 }
 
@@ -175,8 +180,9 @@ export interface Children {
 /**
  * Movie Metadata
  */
-export interface MovieMetadata extends BaseMetadata, WithDuration, WithTaglineAndStudio {
-  type: 'movie';
+export interface MovieMetadata
+  extends BaseMetadata, WithDuration, WithTaglineAndStudio {
+  type: "movie";
   Image?: Image[];
   OriginalImage?: Image[];
   Genre?: Genre[];
@@ -195,8 +201,9 @@ export interface MovieMetadata extends BaseMetadata, WithDuration, WithTaglineAn
 /**
  * TV Show Metadata
  */
-export interface ShowMetadata extends BaseMetadata, WithDuration, WithTaglineAndStudio {
-  type: 'show';
+export interface ShowMetadata
+  extends BaseMetadata, WithDuration, WithTaglineAndStudio {
+  type: "show";
   Image?: Image[];
   OriginalImage?: Image[];
   Genre?: Genre[];
@@ -218,7 +225,7 @@ export interface ShowMetadata extends BaseMetadata, WithDuration, WithTaglineAnd
  * Season Metadata
  */
 export interface SeasonMetadata extends BaseMetadata, WithParent {
-  type: 'season';
+  type: "season";
   Image?: Image[];
   OriginalImage?: Image[];
   Guid?: Guid[];
@@ -228,8 +235,9 @@ export interface SeasonMetadata extends BaseMetadata, WithParent {
 /**
  * Episode Metadata
  */
-export interface EpisodeMetadata extends BaseMetadata, WithDuration, WithParent, WithGrandparent {
-  type: 'episode';
+export interface EpisodeMetadata
+  extends BaseMetadata, WithDuration, WithParent, WithGrandparent {
+  type: "episode";
   Image?: Image[];
   OriginalImage?: Image[];
   Guid?: Guid[];
@@ -243,7 +251,11 @@ export interface EpisodeMetadata extends BaseMetadata, WithDuration, WithParent,
 /**
  * Union type for all metadata types
  */
-export type Metadata = MovieMetadata | ShowMetadata | SeasonMetadata | EpisodeMetadata;
+export type Metadata =
+  | MovieMetadata
+  | ShowMetadata
+  | SeasonMetadata
+  | EpisodeMetadata;
 
 /**
  * MediaContainer wraps metadata items in responses

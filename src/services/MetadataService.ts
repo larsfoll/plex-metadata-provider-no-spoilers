@@ -3,11 +3,21 @@
  * See: docs/API Endpoints.md - Metadata Feature
  */
 
-import { TMDBClient } from './TMDBClient';
-import { TMDBMapper } from '../mappers/TMDBMapper';
-import { MetadataResponse, ShowMetadata, SeasonMetadata, EpisodeMetadata, Image } from '../models/Metadata';
-import { TV_PROVIDER_IDENTIFIER } from '../providers/TVProvider';
-import { constructGuid, constructMetadataKey, constructMetadataKeyWithChildren } from '../utils/guid';
+import { TMDBClient } from "./TMDBClient";
+import { TMDBMapper } from "../mappers/TMDBMapper";
+import {
+  MetadataResponse,
+  ShowMetadata,
+  SeasonMetadata,
+  EpisodeMetadata,
+  Image,
+} from "../models/Metadata";
+import { TV_PROVIDER_IDENTIFIER } from "../providers/TVProvider";
+import {
+  constructGuid,
+  constructMetadataKey,
+  constructMetadataKeyWithChildren,
+} from "../utils/guid";
 
 /**
  * Images response
@@ -44,7 +54,7 @@ export interface PagingOptions {
  * Parsed ratingKey components
  */
 interface ParsedRatingKey {
-  type: 'show' | 'season' | 'episode';
+  type: "show" | "season" | "episode";
   tvId: number;
   seasonNumber?: number;
   episodeNumber?: number;
@@ -84,16 +94,18 @@ export class MetadataService {
     const showMatch = ratingKey.match(/^tmdb-show-(\d+)$/);
     if (showMatch) {
       return {
-        type: 'show',
+        type: "show",
         tvId: parseInt(showMatch[1], 10),
       };
     }
 
     // Season with episode group: tmdb-season-{tvId}-{seasonNumber}-{groupType}-{groupId}
-    const seasonGroupMatch = ratingKey.match(/^tmdb-season-(\d+)-(\d+)-([a-z]+)-([a-f0-9]+)$/);
+    const seasonGroupMatch = ratingKey.match(
+      /^tmdb-season-(\d+)-(\d+)-([a-z]+)-([a-f0-9]+)$/,
+    );
     if (seasonGroupMatch) {
       return {
-        type: 'season',
+        type: "season",
         tvId: parseInt(seasonGroupMatch[1], 10),
         seasonNumber: parseInt(seasonGroupMatch[2], 10),
         episodeGroupId: seasonGroupMatch[4],
@@ -104,17 +116,19 @@ export class MetadataService {
     const seasonMatch = ratingKey.match(/^tmdb-season-(\d+)-(\d+)$/);
     if (seasonMatch) {
       return {
-        type: 'season',
+        type: "season",
         tvId: parseInt(seasonMatch[1], 10),
         seasonNumber: parseInt(seasonMatch[2], 10),
       };
     }
 
     // Episode with episode group: tmdb-episode-{tvId}-{seasonNumber}-{episodeNumber}-{groupType}-{groupId}
-    const episodeGroupMatch = ratingKey.match(/^tmdb-episode-(\d+)-(\d+)-(\d+)-([a-z]+)-([a-f0-9]+)$/);
+    const episodeGroupMatch = ratingKey.match(
+      /^tmdb-episode-(\d+)-(\d+)-(\d+)-([a-z]+)-([a-f0-9]+)$/,
+    );
     if (episodeGroupMatch) {
       return {
-        type: 'episode',
+        type: "episode",
         tvId: parseInt(episodeGroupMatch[1], 10),
         seasonNumber: parseInt(episodeGroupMatch[2], 10),
         episodeNumber: parseInt(episodeGroupMatch[3], 10),
@@ -126,7 +140,7 @@ export class MetadataService {
     const episodeMatch = ratingKey.match(/^tmdb-episode-(\d+)-(\d+)-(\d+)$/);
     if (episodeMatch) {
       return {
-        type: 'episode',
+        type: "episode",
         tvId: parseInt(episodeMatch[1], 10),
         seasonNumber: parseInt(episodeMatch[2], 10),
         episodeNumber: parseInt(episodeMatch[3], 10),
@@ -141,7 +155,7 @@ export class MetadataService {
    */
   private async getShow(
     tvId: number,
-    options: MetadataServiceOptions
+    options: MetadataServiceOptions,
   ): Promise<MetadataResponse> {
     const mapper = await this.getMapper();
 
@@ -157,7 +171,9 @@ export class MetadataService {
     // If includeChildren and episodeOrder are both set, we need to fetch episode group children
     if (options.includeChildren && options.episodeOrder) {
       // Fetch episode group details
-      const episodeGroupDetails = await this.tmdbClient.getEpisodeGroupDetails(options.episodeOrder);
+      const episodeGroupDetails = await this.tmdbClient.getEpisodeGroupDetails(
+        options.episodeOrder,
+      );
 
       // Map show metadata without children first
       const showMetadata = mapper.mapTVShow(showDetails, {
@@ -167,7 +183,9 @@ export class MetadataService {
       });
 
       const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
-      const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+      const showThumb = await this.tmdbClient.getImageURL(
+        showDetails.poster_path,
+      );
 
       // Map episode group seasons
       const episodeGroupSeasons = mapper.mapEpisodeGroupSeasons(
@@ -175,7 +193,7 @@ export class MetadataService {
         tvId,
         showDetails.name,
         showGuid,
-        showThumb || undefined
+        showThumb || undefined,
       );
 
       // Add episode group seasons as children
@@ -220,7 +238,7 @@ export class MetadataService {
     tvId: number,
     seasonNumber: number,
     options: MetadataServiceOptions,
-    episodeGroupId?: string
+    episodeGroupId?: string,
   ): Promise<MetadataResponse> {
     const mapper = await this.getMapper();
 
@@ -235,29 +253,39 @@ export class MetadataService {
       ]);
 
       // Find the specific group (season) by order
-      const group = episodeGroupDetails.groups.find(g => g.order === seasonNumber);
+      const group = episodeGroupDetails.groups.find(
+        (g) => g.order === seasonNumber,
+      );
       if (!group) {
         throw new Error(`Episode group season ${seasonNumber} not found`);
       }
 
       // Fetch all TMDB episodes referenced in this group
-      const uniqueSeasons = [...new Set(group.episodes.map(e => e.season_number))];
+      const uniqueSeasons = [
+        ...new Set(group.episodes.map((e) => e.season_number)),
+      ];
       const allSeasonDetails = await Promise.all(
-        uniqueSeasons.map(sn =>
+        uniqueSeasons.map((sn) =>
           this.tmdbClient.getSeasonDetails(tvId, sn, {
             language: options.language,
-          })
-        )
+          }),
+        ),
       );
 
       // Flatten all episodes
-      const allTmdbEpisodes = allSeasonDetails.flatMap(sd => sd.episodes || []);
+      const allTmdbEpisodes = allSeasonDetails.flatMap(
+        (sd) => sd.episodes || [],
+      );
 
       const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
-      const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+      const showThumb = await this.tmdbClient.getImageURL(
+        showDetails.poster_path,
+      );
 
       // Create season metadata using episode group format
-      const groupTypeShort = this.getEpisodeGroupTypeShortTag(episodeGroupDetails.type);
+      const groupTypeShort = this.getEpisodeGroupTypeShortTag(
+        episodeGroupDetails.type,
+      );
       const ratingKey = `tmdb-season-${tvId}-${seasonNumber}-${groupTypeShort}-${episodeGroupId}`;
       const parentRatingKey = `tmdb-show-${tvId}`;
 
@@ -272,21 +300,21 @@ export class MetadataService {
         showGuid,
         group.name,
         seasonNumber,
-        showThumb || undefined
+        showThumb || undefined,
       );
 
       const seasonMetadata: SeasonMetadata = {
-        type: 'season',
+        type: "season",
         ratingKey,
         key: constructMetadataKeyWithChildren(ratingKey),
-        guid: constructGuid(TV_PROVIDER_IDENTIFIER, 'season', ratingKey),
+        guid: constructGuid(TV_PROVIDER_IDENTIFIER, "season", ratingKey),
         title: group.name,
-        originallyAvailableAt: '',
+        originallyAvailableAt: "",
         index: seasonNumber,
         parentRatingKey,
         parentKey: constructMetadataKey(parentRatingKey),
         parentGuid: showGuid,
-        parentType: 'show',
+        parentType: "show",
         parentTitle: showDetails.name,
         parentThumb: showThumb || undefined,
         Children: {
@@ -317,7 +345,9 @@ export class MetadataService {
     ]);
 
     const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
-    const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+    const showThumb = await this.tmdbClient.getImageURL(
+      showDetails.poster_path,
+    );
 
     const seasonMetadata = mapper.mapSeason(
       seasonDetails,
@@ -325,7 +355,7 @@ export class MetadataService {
       showDetails.name,
       showGuid,
       showThumb || undefined,
-      { includeChildren: options.includeChildren }
+      { includeChildren: options.includeChildren },
     );
 
     return {
@@ -344,15 +374,15 @@ export class MetadataService {
    */
   private getEpisodeGroupTypeShortTag(type: number): string {
     const typeMap: { [key: number]: string } = {
-      1: 'aired',
-      2: 'absolute',
-      3: 'dvd',
-      4: 'digital',
-      5: 'story',
-      6: 'production',
-      7: 'tv',
+      1: "aired",
+      2: "absolute",
+      3: "dvd",
+      4: "digital",
+      5: "story",
+      6: "production",
+      7: "tv",
     };
-    return typeMap[type] || 'unknown';
+    return typeMap[type] || "unknown";
   }
 
   /**
@@ -362,7 +392,7 @@ export class MetadataService {
     tvId: number,
     seasonNumber: number,
     episodeNumber: number,
-    options: MetadataServiceOptions
+    options: MetadataServiceOptions,
   ): Promise<MetadataResponse> {
     const mapper = await this.getMapper();
 
@@ -378,7 +408,9 @@ export class MetadataService {
 
     const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
     const seasonGuid = `${TV_PROVIDER_IDENTIFIER}://season/tmdb-season-${tvId}-${seasonNumber}`;
-    const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+    const showThumb = await this.tmdbClient.getImageURL(
+      showDetails.poster_path,
+    );
 
     const episodeMetadata = mapper.mapEpisode(
       episodeDetails,
@@ -388,7 +420,7 @@ export class MetadataService {
       `Season ${seasonNumber}`,
       seasonGuid,
       showThumb || undefined,
-      undefined
+      undefined,
     );
 
     return {
@@ -409,7 +441,7 @@ export class MetadataService {
    */
   async getMetadata(
     ratingKey: string,
-    options: MetadataServiceOptions = {}
+    options: MetadataServiceOptions = {},
   ): Promise<MetadataResponse> {
     const parsed = this.parseRatingKey(ratingKey);
 
@@ -418,18 +450,31 @@ export class MetadataService {
     }
 
     switch (parsed.type) {
-      case 'show':
+      case "show":
         return this.getShow(parsed.tvId, options);
-      case 'season':
+      case "season":
         if (parsed.seasonNumber === undefined) {
           throw new Error(`Invalid season ratingKey: ${ratingKey}`);
         }
-        return this.getSeason(parsed.tvId, parsed.seasonNumber, options, parsed.episodeGroupId);
-      case 'episode':
-        if (parsed.seasonNumber === undefined || parsed.episodeNumber === undefined) {
+        return this.getSeason(
+          parsed.tvId,
+          parsed.seasonNumber,
+          options,
+          parsed.episodeGroupId,
+        );
+      case "episode":
+        if (
+          parsed.seasonNumber === undefined ||
+          parsed.episodeNumber === undefined
+        ) {
           throw new Error(`Invalid episode ratingKey: ${ratingKey}`);
         }
-        return this.getEpisode(parsed.tvId, parsed.seasonNumber, parsed.episodeNumber, options);
+        return this.getEpisode(
+          parsed.tvId,
+          parsed.seasonNumber,
+          parsed.episodeNumber,
+          options,
+        );
       default:
         throw new Error(`Unsupported metadata type: ${parsed.type}`);
     }
@@ -442,7 +487,7 @@ export class MetadataService {
    */
   async getImages(
     ratingKey: string,
-    options: MetadataServiceOptions = {}
+    options: MetadataServiceOptions = {},
   ): Promise<ImagesResponse> {
     const parsed = this.parseRatingKey(ratingKey);
 
@@ -453,7 +498,7 @@ export class MetadataService {
     const images: Image[] = [];
 
     switch (parsed.type) {
-      case 'show': {
+      case "show": {
         const [showDetails, showImages] = await Promise.all([
           this.tmdbClient.getTVShowDetails(parsed.tvId, {
             language: options.language,
@@ -467,7 +512,7 @@ export class MetadataService {
         if (showImages.posters) {
           for (const poster of showImages.posters) {
             images.push({
-              type: 'coverPoster',
+              type: "coverPoster",
               url: (await this.tmdbClient.getImageURL(poster.file_path))!,
               alt: showDetails.name,
             });
@@ -480,14 +525,14 @@ export class MetadataService {
             // Regular backdrops
             if (backdrop.aspect_ratio < 0.9 || backdrop.aspect_ratio > 1.1) {
               images.push({
-                type: 'background',
+                type: "background",
                 url: (await this.tmdbClient.getImageURL(backdrop.file_path))!,
                 alt: showDetails.name,
               });
             } else {
               // Square backdrops (aspect ratio close to 1:1)
               images.push({
-                type: 'backgroundSquare',
+                type: "backgroundSquare",
                 url: (await this.tmdbClient.getImageURL(backdrop.file_path))!,
                 alt: showDetails.name,
               });
@@ -499,7 +544,7 @@ export class MetadataService {
         if (showImages.logos) {
           for (const logo of showImages.logos) {
             images.push({
-              type: 'clearLogo',
+              type: "clearLogo",
               url: (await this.tmdbClient.getImageURL(logo.file_path))!,
               alt: showDetails.name,
             });
@@ -508,7 +553,7 @@ export class MetadataService {
         break;
       }
 
-      case 'season': {
+      case "season": {
         if (parsed.seasonNumber === undefined) {
           throw new Error(`Invalid season ratingKey: ${ratingKey}`);
         }
@@ -526,7 +571,7 @@ export class MetadataService {
         if (seasonImages.posters) {
           for (const poster of seasonImages.posters) {
             images.push({
-              type: 'coverPoster',
+              type: "coverPoster",
               url: (await this.tmdbClient.getImageURL(poster.file_path))!,
               alt: `${showDetails.name} - Season ${parsed.seasonNumber}`,
             });
@@ -535,8 +580,11 @@ export class MetadataService {
         break;
       }
 
-      case 'episode': {
-        if (parsed.seasonNumber === undefined || parsed.episodeNumber === undefined) {
+      case "episode": {
+        if (
+          parsed.seasonNumber === undefined ||
+          parsed.episodeNumber === undefined
+        ) {
           throw new Error(`Invalid episode ratingKey: ${ratingKey}`);
         }
 
@@ -544,16 +592,21 @@ export class MetadataService {
           this.tmdbClient.getTVShowDetails(parsed.tvId, {
             language: options.language,
           }),
-          this.tmdbClient.getEpisodeImages(parsed.tvId, parsed.seasonNumber, parsed.episodeNumber, {
-            language: options.language,
-          }),
+          this.tmdbClient.getEpisodeImages(
+            parsed.tvId,
+            parsed.seasonNumber,
+            parsed.episodeNumber,
+            {
+              language: options.language,
+            },
+          ),
         ]);
 
         // Add all episode stills
         if (episodeImages.stills) {
           for (const still of episodeImages.stills) {
             images.push({
-              type: 'snapshot',
+              type: "snapshot",
               url: (await this.tmdbClient.getImageURL(still.file_path))!,
               alt: `${showDetails.name} - S${parsed.seasonNumber}E${parsed.episodeNumber}`,
             });
@@ -586,7 +639,7 @@ export class MetadataService {
   async getChildren(
     ratingKey: string,
     options: MetadataServiceOptions = {},
-    paging: PagingOptions = {}
+    paging: PagingOptions = {},
   ): Promise<MetadataResponse> {
     const parsed = this.parseRatingKey(ratingKey);
 
@@ -599,7 +652,7 @@ export class MetadataService {
     const containerStart = paging.containerStart ?? 1;
 
     switch (parsed.type) {
-      case 'show': {
+      case "show": {
         // Check if episode ordering is requested
         if (options.episodeOrder) {
           // Fetch episode group details
@@ -611,7 +664,9 @@ export class MetadataService {
           ]);
 
           const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${parsed.tvId}`;
-          const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+          const showThumb = await this.tmdbClient.getImageURL(
+            showDetails.poster_path,
+          );
 
           // Map episode group seasons
           const allSeasons = mapper.mapEpisodeGroupSeasons(
@@ -619,7 +674,7 @@ export class MetadataService {
             parsed.tvId,
             showDetails.name,
             showGuid,
-            showThumb || undefined
+            showThumb || undefined,
           );
 
           // Apply paging (containerStart is 1-based)
@@ -639,25 +694,31 @@ export class MetadataService {
         }
 
         // Default: Get show details with all seasons
-        const showDetails = await this.tmdbClient.getTVShowDetails(parsed.tvId, {
-          language: options.language,
-        });
+        const showDetails = await this.tmdbClient.getTVShowDetails(
+          parsed.tvId,
+          {
+            language: options.language,
+          },
+        );
 
         const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${parsed.tvId}`;
-        const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+        const showThumb = await this.tmdbClient.getImageURL(
+          showDetails.poster_path,
+        );
 
         // Map all seasons (filter out specials with season_number < 0)
-        const allSeasons = showDetails.seasons
-          ?.filter((s) => s.season_number >= 0)
-          .map((season) =>
-            mapper.mapSeason(
-              season,
-              parsed.tvId,
-              showDetails.name,
-              showGuid,
-              showThumb || undefined
-            )
-          ) || [];
+        const allSeasons =
+          showDetails.seasons
+            ?.filter((s) => s.season_number >= 0)
+            .map((season) =>
+              mapper.mapSeason(
+                season,
+                parsed.tvId,
+                showDetails.name,
+                showGuid,
+                showThumb || undefined,
+              ),
+            ) || [];
 
         // Apply paging (containerStart is 1-based)
         const startIndex = containerStart - 1;
@@ -675,7 +736,7 @@ export class MetadataService {
         };
       }
 
-      case 'season': {
+      case "season": {
         if (parsed.seasonNumber === undefined) {
           throw new Error(`Invalid season ratingKey: ${ratingKey}`);
         }
@@ -691,32 +752,42 @@ export class MetadataService {
           ]);
 
           // Find the specific group (season) by order
-          const group = episodeGroupDetails.groups.find(g => g.order === parsed.seasonNumber);
+          const group = episodeGroupDetails.groups.find(
+            (g) => g.order === parsed.seasonNumber,
+          );
           if (!group) {
-            throw new Error(`Episode group season ${parsed.seasonNumber} not found`);
+            throw new Error(
+              `Episode group season ${parsed.seasonNumber} not found`,
+            );
           }
 
           // Fetch all TMDB episodes referenced in this group
-          const episodesToFetch = group.episodes.map(ep => ({
+          const episodesToFetch = group.episodes.map((ep) => ({
             seasonNumber: ep.season_number,
             episodeNumber: ep.episode_number,
           }));
 
           // Fetch unique season/episode combinations
-          const uniqueSeasons = [...new Set(episodesToFetch.map(e => e.seasonNumber))];
+          const uniqueSeasons = [
+            ...new Set(episodesToFetch.map((e) => e.seasonNumber)),
+          ];
           const allSeasonDetails = await Promise.all(
-            uniqueSeasons.map(sn =>
+            uniqueSeasons.map((sn) =>
               this.tmdbClient.getSeasonDetails(parsed.tvId, sn, {
                 language: options.language,
-              })
-            )
+              }),
+            ),
           );
 
           // Flatten all episodes
-          const allTmdbEpisodes = allSeasonDetails.flatMap(sd => sd.episodes || []);
+          const allTmdbEpisodes = allSeasonDetails.flatMap(
+            (sd) => sd.episodes || [],
+          );
 
           const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${parsed.tvId}`;
-          const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+          const showThumb = await this.tmdbClient.getImageURL(
+            showDetails.poster_path,
+          );
 
           // Map episode group episodes
           const allEpisodes = mapper.mapEpisodeGroupEpisodes(
@@ -729,7 +800,7 @@ export class MetadataService {
             showGuid,
             group.name,
             parsed.seasonNumber,
-            showThumb || undefined
+            showThumb || undefined,
           );
 
           // Apply paging (containerStart is 1-based)
@@ -760,21 +831,24 @@ export class MetadataService {
 
         const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${parsed.tvId}`;
         const seasonGuid = `${TV_PROVIDER_IDENTIFIER}://season/tmdb-season-${parsed.tvId}-${parsed.seasonNumber}`;
-        const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+        const showThumb = await this.tmdbClient.getImageURL(
+          showDetails.poster_path,
+        );
 
         // Map all episodes
-        const allEpisodes = seasonDetails.episodes?.map((episode) =>
-          mapper.mapEpisode(
-            episode,
-            parsed.tvId,
-            showDetails.name,
-            showGuid,
-            `Season ${parsed.seasonNumber}`,
-            seasonGuid,
-            showThumb || undefined,
-            undefined
-          )
-        ) || [];
+        const allEpisodes =
+          seasonDetails.episodes?.map((episode) =>
+            mapper.mapEpisode(
+              episode,
+              parsed.tvId,
+              showDetails.name,
+              showGuid,
+              `Season ${parsed.seasonNumber}`,
+              seasonGuid,
+              showThumb || undefined,
+              undefined,
+            ),
+          ) || [];
 
         // Apply paging (containerStart is 1-based)
         const startIndex = containerStart - 1;
@@ -806,7 +880,7 @@ export class MetadataService {
   async getGrandchildren(
     ratingKey: string,
     options: MetadataServiceOptions = {},
-    paging: PagingOptions = {}
+    paging: PagingOptions = {},
   ): Promise<MetadataResponse> {
     const parsed = this.parseRatingKey(ratingKey);
 
@@ -814,7 +888,7 @@ export class MetadataService {
       throw new Error(`Invalid ratingKey format: ${ratingKey}`);
     }
 
-    if (parsed.type !== 'show') {
+    if (parsed.type !== "show") {
       throw new Error(`Cannot get grandchildren for type: ${parsed.type}`);
     }
 
@@ -828,35 +902,39 @@ export class MetadataService {
     });
 
     const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${parsed.tvId}`;
-    const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+    const showThumb = await this.tmdbClient.getImageURL(
+      showDetails.poster_path,
+    );
 
     // Fetch all episodes from all seasons
     const allEpisodes: EpisodeMetadata[] = [];
 
     // Get all regular seasons (season_number >= 1)
-    const regularSeasons = showDetails.seasons?.filter((s) => s.season_number >= 1) || [];
+    const regularSeasons =
+      showDetails.seasons?.filter((s) => s.season_number >= 1) || [];
 
     for (const season of regularSeasons) {
       const seasonDetails = await this.tmdbClient.getSeasonDetails(
         parsed.tvId,
         season.season_number,
-        { language: options.language }
+        { language: options.language },
       );
 
       const seasonGuid = `${TV_PROVIDER_IDENTIFIER}://season/tmdb-season-${parsed.tvId}-${season.season_number}`;
 
-      const episodes = seasonDetails.episodes?.map((episode) =>
-        mapper.mapEpisode(
-          episode,
-          parsed.tvId,
-          showDetails.name,
-          showGuid,
-          `Season ${season.season_number}`,
-          seasonGuid,
-          showThumb || undefined,
-          undefined
-        )
-      ) || [];
+      const episodes =
+        seasonDetails.episodes?.map((episode) =>
+          mapper.mapEpisode(
+            episode,
+            parsed.tvId,
+            showDetails.name,
+            showGuid,
+            `Season ${season.season_number}`,
+            seasonGuid,
+            showThumb || undefined,
+            undefined,
+          ),
+        ) || [];
 
       allEpisodes.push(...episodes);
     }

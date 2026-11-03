@@ -3,14 +3,14 @@
  * Supports configurable log levels via LOG_LEVEL environment variable
  */
 
-import winston from 'winston';
+import winston from "winston";
 
 // Define log level from environment variable or default to 'info'
-const logLevel = process.env.LOG_LEVEL || 'info';
+const logLevel = process.env.LOG_LEVEL || "info";
 
 // Define custom format for console output
 const consoleFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
   winston.format.colorize(),
   winston.format.printf(({ timestamp, level, message, ...meta }) => {
     let msg = `${timestamp} [${level}]: ${message}`;
@@ -21,7 +21,7 @@ const consoleFormat = winston.format.combine(
     }
 
     return msg;
-  })
+  }),
 );
 
 // Create the logger instance

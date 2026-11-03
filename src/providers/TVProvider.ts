@@ -8,16 +8,17 @@ import {
   MediaProviderResponse,
   MetadataType,
   FeatureType,
-} from '../models/MediaProvider';
-import { API_PATHS } from '../constants';
+} from "../models/MediaProvider";
+import { API_PATHS } from "../constants";
 
 /**
  * TV Provider configuration
  */
-export const TV_PROVIDER_IDENTIFIER = 'tv.plex.agents.custom.example.themoviedb.tv';
-export const TV_PROVIDER_TITLE = 'TheMovieDB Example TV Provider';
-export const TV_PROVIDER_VERSION = '1.0.0';
-export const TV_PROVIDER_BASE_PATH = '/tv';
+export const TV_PROVIDER_IDENTIFIER =
+  "tv.plex.agents.custom.example.themoviedb.tv";
+export const TV_PROVIDER_TITLE = "TheMovieDB Example TV Provider";
+export const TV_PROVIDER_VERSION = "1.0.0";
+export const TV_PROVIDER_BASE_PATH = "/tv";
 
 /**
  * Creates the TV MediaProvider definition

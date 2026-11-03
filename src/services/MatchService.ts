@@ -3,10 +3,15 @@
  * See: docs/API Endpoints.md - Match Feature
  */
 
-import { TMDBClient } from './TMDBClient';
-import { TMDBMapper } from '../mappers/TMDBMapper';
-import { MetadataResponse, ShowMetadata, SeasonMetadata, EpisodeMetadata } from '../models/Metadata';
-import { TV_PROVIDER_IDENTIFIER } from '../providers/TVProvider';
+import { TMDBClient } from "./TMDBClient";
+import { TMDBMapper } from "../mappers/TMDBMapper";
+import {
+  MetadataResponse,
+  ShowMetadata,
+  SeasonMetadata,
+  EpisodeMetadata,
+} from "../models/Metadata";
+import { TV_PROVIDER_IDENTIFIER } from "../providers/TVProvider";
 
 /**
  * Match request body parameters
@@ -58,7 +63,9 @@ export class MatchService {
   /**
    * Parse external GUID to extract provider and ID
    */
-  private parseExternalGuid(guid: string): { provider: string; id: string } | null {
+  private parseExternalGuid(
+    guid: string,
+  ): { provider: string; id: string } | null {
     const match = guid.match(/^([^:]+):\/\/(.+)$/);
     if (!match) return null;
 
@@ -73,7 +80,7 @@ export class MatchService {
    */
   private async matchShow(
     request: MatchRequest,
-    options: MatchServiceOptions
+    options: MatchServiceOptions,
   ): Promise<MetadataResponse> {
     const mapper = await this.getMapper();
     let matches: ShowMetadata[] = [];
@@ -81,13 +88,17 @@ export class MatchService {
     // Try to match by external ID first
     if (request.guid) {
       const parsed = this.parseExternalGuid(request.guid);
-      if (parsed && (parsed.provider === 'imdb' || parsed.provider === 'tvdb')) {
+      if (
+        parsed &&
+        (parsed.provider === "imdb" || parsed.provider === "tvdb")
+      ) {
         try {
-          const externalSource = parsed.provider === 'imdb' ? 'imdb_id' : 'tvdb_id';
+          const externalSource =
+            parsed.provider === "imdb" ? "imdb_id" : "tvdb_id";
           const findResult = await this.tmdbClient.findTVShowByExternalId(
             parsed.id,
             externalSource,
-            { language: options.language }
+            { language: options.language },
           );
 
           if (findResult.tv_results && findResult.tv_results.length > 0) {
@@ -101,11 +112,13 @@ export class MatchService {
               showDetails.credits = showDetails.aggregate_credits as any;
             }
 
-            matches.push(mapper.mapTVShow(showDetails, {
-              includeChildren: request.includeChildren === 1,
-              country: options.country,
-              episodeGroups: showDetails.episode_groups?.results,
-            }));
+            matches.push(
+              mapper.mapTVShow(showDetails, {
+                includeChildren: request.includeChildren === 1,
+                country: options.country,
+                episodeGroups: showDetails.episode_groups?.results,
+              }),
+            );
           }
         } catch (error) {
           // Fall through to title search
@@ -121,7 +134,10 @@ export class MatchService {
       });
 
       // Get detailed info for the top result(s)
-      const limit = request.manual === 1 ? Math.min(5, searchResults.results.length) : Math.min(1, searchResults.results.length);
+      const limit =
+        request.manual === 1
+          ? Math.min(5, searchResults.results.length)
+          : Math.min(1, searchResults.results.length);
 
       for (let i = 0; i < limit; i++) {
         const tvId = searchResults.results[i].id;
@@ -139,11 +155,13 @@ export class MatchService {
           continue;
         }
 
-        matches.push(mapper.mapTVShow(showDetails, {
-          includeChildren: request.includeChildren === 1,
-          country: options.country,
-          episodeGroups: showDetails.episode_groups?.results,
-        }));
+        matches.push(
+          mapper.mapTVShow(showDetails, {
+            includeChildren: request.includeChildren === 1,
+            country: options.country,
+            episodeGroups: showDetails.episode_groups?.results,
+          }),
+        );
       }
     }
 
@@ -163,7 +181,7 @@ export class MatchService {
    */
   private async matchSeason(
     request: MatchRequest,
-    options: MatchServiceOptions
+    options: MatchServiceOptions,
   ): Promise<MetadataResponse> {
     const mapper = await this.getMapper();
     let matches: SeasonMetadata[] = [];
@@ -181,10 +199,13 @@ export class MatchService {
     }
 
     // First, find the TV show
-    const searchResults = await this.tmdbClient.searchTVShows(request.parentTitle, {
-      language: options.language,
-      year: request.year,
-    });
+    const searchResults = await this.tmdbClient.searchTVShows(
+      request.parentTitle,
+      {
+        language: options.language,
+        year: request.year,
+      },
+    );
 
     if (searchResults.results.length === 0) {
       return {
@@ -209,11 +230,13 @@ export class MatchService {
       const seasonDetails = await this.tmdbClient.getSeasonDetails(
         tvId,
         request.index,
-        { language: options.language }
+        { language: options.language },
       );
 
       const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
-      const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+      const showThumb = await this.tmdbClient.getImageURL(
+        showDetails.poster_path,
+      );
 
       const seasonMetadata = mapper.mapSeason(
         seasonDetails,
@@ -221,7 +244,7 @@ export class MatchService {
         showDetails.name,
         showGuid,
         showThumb || undefined,
-        { includeChildren: request.includeChildren === 1 }
+        { includeChildren: request.includeChildren === 1 },
       );
 
       matches.push(seasonMetadata);
@@ -245,25 +268,31 @@ export class MatchService {
    */
   private async matchEpisode(
     request: MatchRequest,
-    options: MatchServiceOptions
+    options: MatchServiceOptions,
   ): Promise<MetadataResponse> {
     const mapper = await this.getMapper();
     let matches: EpisodeMetadata[] = [];
 
     // Validate that we have either (index + parentIndex) or date
-    const hasIndexes = request.index !== undefined && request.parentIndex !== undefined;
+    const hasIndexes =
+      request.index !== undefined && request.parentIndex !== undefined;
     const hasDate = request.date !== undefined;
 
     if (!request.grandparentTitle || (!hasIndexes && !hasDate)) {
       // Bad request - need either indexes or date
-      throw new Error('Episode matching requires either (index + parentIndex) or date parameter');
+      throw new Error(
+        "Episode matching requires either (index + parentIndex) or date parameter",
+      );
     }
 
     // First, find the TV show
-    const searchResults = await this.tmdbClient.searchTVShows(request.grandparentTitle, {
-      language: options.language,
-      year: request.year,
-    });
+    const searchResults = await this.tmdbClient.searchTVShows(
+      request.grandparentTitle,
+      {
+        language: options.language,
+        year: request.year,
+      },
+    );
 
     if (searchResults.results.length === 0) {
       return {
@@ -290,12 +319,14 @@ export class MatchService {
           tvId,
           request.parentIndex!,
           request.index!,
-          { language: options.language }
+          { language: options.language },
         );
 
         const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
         const seasonGuid = `${TV_PROVIDER_IDENTIFIER}://season/tmdb-season-${tvId}-${request.parentIndex}`;
-        const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+        const showThumb = await this.tmdbClient.getImageURL(
+          showDetails.poster_path,
+        );
 
         const episodeMetadata = mapper.mapEpisode(
           episodeDetails,
@@ -305,7 +336,7 @@ export class MatchService {
           `Season ${request.parentIndex}`,
           seasonGuid,
           showThumb || undefined,
-          undefined
+          undefined,
         );
 
         matches.push(episodeMetadata);
@@ -316,25 +347,28 @@ export class MatchService {
     // Match by air date
     else if (hasDate) {
       // Fetch all seasons and search for episode by air date
-      const seasons = showDetails.seasons?.filter((s) => s.season_number >= 1) || [];
+      const seasons =
+        showDetails.seasons?.filter((s) => s.season_number >= 1) || [];
 
       for (const season of seasons) {
         try {
           const seasonDetails = await this.tmdbClient.getSeasonDetails(
             tvId,
             season.season_number,
-            { language: options.language }
+            { language: options.language },
           );
 
           // Find episode with matching air date
           const matchingEpisode = seasonDetails.episodes?.find(
-            (ep) => ep.air_date === request.date
+            (ep) => ep.air_date === request.date,
           );
 
           if (matchingEpisode) {
             const showGuid = `${TV_PROVIDER_IDENTIFIER}://show/tmdb-show-${tvId}`;
             const seasonGuid = `${TV_PROVIDER_IDENTIFIER}://season/tmdb-season-${tvId}-${season.season_number}`;
-            const showThumb = await this.tmdbClient.getImageURL(showDetails.poster_path);
+            const showThumb = await this.tmdbClient.getImageURL(
+              showDetails.poster_path,
+            );
 
             const episodeMetadata = mapper.mapEpisode(
               matchingEpisode,
@@ -344,7 +378,7 @@ export class MatchService {
               `Season ${season.season_number}`,
               seasonGuid,
               showThumb || undefined,
-              undefined
+              undefined,
             );
 
             matches.push(episodeMetadata);
@@ -373,7 +407,7 @@ export class MatchService {
    */
   async match(
     request: MatchRequest,
-    options: MatchServiceOptions = {}
+    options: MatchServiceOptions = {},
   ): Promise<MetadataResponse> {
     switch (request.type) {
       case 2: // Show

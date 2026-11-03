@@ -18,9 +18,9 @@ export enum MetadataType {
  * Feature type constants
  */
 export enum FeatureType {
-  METADATA = 'metadata',
-  MATCH = 'match',
-  COLLECTION = 'collection',
+  METADATA = "metadata",
+  MATCH = "match",
+  COLLECTION = "collection",
 }
 
 /**

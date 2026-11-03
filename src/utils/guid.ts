@@ -3,8 +3,8 @@
  * See: docs/Metadata.md#guid-construction
  */
 
-import { MetadataTypeString } from '../models/Metadata';
-import { API_PATHS } from '../constants';
+import { MetadataTypeString } from "../models/Metadata";
+import { API_PATHS } from "../constants";
 
 /**
  * Validates a ratingKey format
@@ -27,11 +27,11 @@ export function validateRatingKey(ratingKey: string): boolean {
 export function constructGuid(
   scheme: string,
   metadataType: MetadataTypeString,
-  ratingKey: string
+  ratingKey: string,
 ): string {
   if (!validateRatingKey(ratingKey)) {
     throw new Error(
-      `Invalid ratingKey: "${ratingKey}". Must contain only ASCII letters, numbers, dashes, and underscores.`
+      `Invalid ratingKey: "${ratingKey}". Must contain only ASCII letters, numbers, dashes, and underscores.`,
     );
   }
 
@@ -88,6 +88,9 @@ export function constructMetadataKeyWithChildren(ratingKey: string): string {
  * @param id - External ID
  * @returns Formatted external GUID
  */
-export function createExternalGuid(provider: string, id: string | number): string {
+export function createExternalGuid(
+  provider: string,
+  id: string | number,
+): string {
   return `${provider}://${id}`;
 }
