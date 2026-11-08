@@ -5,7 +5,7 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import { TV_PROVIDER_VERSION } from "../providers/TVProvider";
 
-const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT}`;
 
 const options: swaggerJsdoc.Options = {
   definition: {

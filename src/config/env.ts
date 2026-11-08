@@ -1,14 +1,4 @@
 /**
- * Environment configuration
- */
-
-import dotenv from "dotenv";
-import path from "path";
-
-// Load .env file
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
-
-/**
  * Environment configuration object
  */
 export const config = {
@@ -16,7 +6,7 @@ export const config = {
     apiKey: process.env.TMDB_API_KEY || "",
   },
   server: {
-    port: parseInt(process.env.PORT || "3000", 10),
+    port: parseInt(process.env.PORT || "0"),
   },
 };
 
@@ -28,6 +18,10 @@ export function validateConfig(): void {
 
   if (!config.tmdb.apiKey) {
     errors.push("TMDB_API_KEY is not set in environment variables");
+  }
+
+  if (!config.server.port) {
+    errors.push("PORT is not set in environment variables");
   }
 
   if (errors.length > 0) {
