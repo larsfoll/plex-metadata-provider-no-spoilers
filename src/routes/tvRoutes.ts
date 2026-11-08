@@ -149,7 +149,8 @@ router.get(
 
       // Get images
       const service = getMetadataService();
-      const result = await service.getImages(ratingKey, { language });
+      const safeRatingKey = Array.isArray(ratingKey) ? ratingKey[0] : ratingKey;
+      const result = await service.getImages(safeRatingKey, { language });
 
       res.json(result);
     } catch (error) {
@@ -251,7 +252,8 @@ router.get(
 
       // Get metadata
       const service = getMetadataService();
-      const result = await service.getMetadata(ratingKey, {
+      const safeRatingKey = Array.isArray(ratingKey) ? ratingKey[0] : ratingKey;
+      const result = await service.getMetadata(safeRatingKey, {
         language,
         country,
         includeChildren,
@@ -373,8 +375,9 @@ router.get(
 
       // Get children
       const service = getMetadataService();
+      const safeRatingKey = Array.isArray(ratingKey) ? ratingKey[0] : ratingKey;
       const result = await service.getChildren(
-        ratingKey,
+        safeRatingKey,
         { language, country, episodeOrder },
         { containerSize, containerStart },
       );
@@ -491,8 +494,9 @@ router.get(
 
       // Get grandchildren
       const service = getMetadataService();
+      const safeRatingKey = Array.isArray(ratingKey) ? ratingKey[0] : ratingKey;
       const result = await service.getGrandchildren(
-        ratingKey,
+        safeRatingKey,
         { language, country },
         { containerSize, containerStart },
       );
