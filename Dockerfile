@@ -1,5 +1,5 @@
 # Builder stage: install all dependencies and compile TypeScript.
-FROM dhi.io/node:26-alpine-dev AS dev
+FROM node:26-alpine AS dev
 
 WORKDIR /app
 
@@ -21,14 +21,8 @@ COPY . .
 
 RUN npm run build
 
-# Expose the port that the application listens on.
-EXPOSE 3000
-
-# Run the application in development mode.
-CMD ["npm", "run", "dev"]
-
 # Deps stage: install production dependencies only.
-FROM dhi.io/node:26-alpine-dev AS deps
+FROM node:26-alpine AS deps
 
 WORKDIR /app
 
@@ -42,17 +36,16 @@ RUN --mount=type=cache,target=/root/.npm \
     npm ci --omit=dev
 
 # Runner stage: minimal runtime image with compiled app and production deps.
-FROM dhi.io/node:26-alpine AS runner
-
-ENV PATH=/app/node_modules/.bin:$PATH
+FROM node:26-alpine AS runner
 
 WORKDIR /app
+ENV PATH=/app/node_modules/.bin:$PATH
 
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=dev --chown=node:node /app/dist ./dist
 
 # Expose the port that the application listens on.
 EXPOSE 3000
-
+USER node
 # Run the application.
 CMD ["npm", "run", "start"]
