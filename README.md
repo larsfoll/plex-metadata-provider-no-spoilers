@@ -35,7 +35,6 @@ Get your API key from: https://www.themoviedb.org/settings/api
 
 ```
 LOG_LEVEL=info  # Log level: error, warn, info, http, verbose, debug, silly (default: info)
-BASE_URL=http://localhost:3000 # Base url for where the server is running
 ```
 
 ### 3. Build
@@ -55,9 +54,11 @@ The server will start on port 3000 (or the PORT specified in .env).
 ## API Endpoints
 
 ### GET /tv
+
 Returns the MediaProvider definition.
 
 **Response:**
+
 ```json
 {
   "MediaProvider": {
@@ -71,15 +72,18 @@ Returns the MediaProvider definition.
 ```
 
 ### POST /tv/library/metadata/matches
+
 Match feature - searches for TV shows, seasons, or episodes.
 
 **Headers:**
+
 - `X-Plex-Language` (optional): Language code (e.g., "en-US")
 - `X-Plex-Country` (optional): Country code (e.g., "US")
 
 **Request Body Examples:**
 
 **Match TV Show:**
+
 ```json
 {
   "type": 2,
@@ -89,6 +93,7 @@ Match feature - searches for TV shows, seasons, or episodes.
 ```
 
 **Match by External ID:**
+
 ```json
 {
   "type": 2,
@@ -97,6 +102,7 @@ Match feature - searches for TV shows, seasons, or episodes.
 ```
 
 **Match Season:**
+
 ```json
 {
   "type": 3,
@@ -106,6 +112,7 @@ Match feature - searches for TV shows, seasons, or episodes.
 ```
 
 **Match Episode:**
+
 ```json
 {
   "type": 4,
@@ -116,6 +123,7 @@ Match feature - searches for TV shows, seasons, or episodes.
 ```
 
 **Manual Search (multiple results):**
+
 ```json
 {
   "type": 2,
@@ -125,6 +133,7 @@ Match feature - searches for TV shows, seasons, or episodes.
 ```
 
 **Response:**
+
 ```json
 {
   "MediaContainer": {

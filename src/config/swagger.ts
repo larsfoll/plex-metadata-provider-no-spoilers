@@ -5,7 +5,6 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import { TV_PROVIDER_VERSION } from "../providers/TVProvider";
 
-const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT}`;
 const apiPaths =
   process.env.NODE_ENV === "production"
     ? ["./dist/routes/*.js"]
@@ -28,7 +27,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: baseUrl,
+        url: "/",
         description: "API server",
       },
     ],

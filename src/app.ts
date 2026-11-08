@@ -4,6 +4,7 @@
 
 import express, { Application } from "express";
 import swaggerUi from "swagger-ui-express";
+import cors from "cors";
 import tvRoutes from "./routes/tvRoutes";
 import { swaggerSpec } from "./config/swagger";
 import logger from "./utils/logger";
@@ -13,6 +14,8 @@ import logger from "./utils/logger";
  */
 export function createApp(): Application {
   const app = express();
+
+  app.use(cors());
 
   // Request logging middleware
   app.use((req, _res, next) => {
