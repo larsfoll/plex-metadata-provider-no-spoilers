@@ -6,6 +6,10 @@ import swaggerJsdoc from "swagger-jsdoc";
 import { TV_PROVIDER_VERSION } from "../providers/TVProvider";
 
 const baseUrl = process.env.BASE_URL || `http://localhost:${process.env.PORT}`;
+const apiPaths =
+  process.env.NODE_ENV === "production"
+    ? ["./dist/routes/*.js"]
+    : ["./src/routes/*.ts"];
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -43,7 +47,7 @@ const options: swaggerJsdoc.Options = {
       },
     ],
   },
-  apis: ["./src/routes/*.ts"], // Path to the API routes
+  apis: apiPaths, // Path to the API routes
 };
 
 export const swaggerSpec = swaggerJsdoc(options);
