@@ -356,6 +356,7 @@ export class MetadataService {
       showGuid,
       showThumb || undefined,
       { includeChildren: options.includeChildren },
+      showDetails,
     );
 
     return {
@@ -421,6 +422,7 @@ export class MetadataService {
       seasonGuid,
       showThumb || undefined,
       undefined,
+      showDetails,
     );
 
     return {
@@ -588,30 +590,30 @@ export class MetadataService {
           throw new Error(`Invalid episode ratingKey: ${ratingKey}`);
         }
 
-        const [showDetails, episodeImages] = await Promise.all([
-          this.tmdbClient.getTVShowDetails(parsed.tvId, {
-            language: options.language,
-          }),
-          this.tmdbClient.getEpisodeImages(
-            parsed.tvId,
-            parsed.seasonNumber,
-            parsed.episodeNumber,
-            {
-              language: options.language,
-            },
-          ),
-        ]);
+        // const [showDetails, episodeImages] = await Promise.all([
+        //   this.tmdbClient.getTVShowDetails(parsed.tvId, {
+        //     language: options.language,
+        //   }),
+        //   this.tmdbClient.getEpisodeImages(
+        //     parsed.tvId,
+        //     parsed.seasonNumber,
+        //     parsed.episodeNumber,
+        //     {
+        //       language: options.language,
+        //     },
+        //   ),
+        // ]);
 
         // Add all episode stills
-        if (episodeImages.stills) {
-          for (const still of episodeImages.stills) {
-            images.push({
-              type: "snapshot",
-              url: (await this.tmdbClient.getImageURL(still.file_path))!,
-              alt: `${showDetails.name} - S${parsed.seasonNumber}E${parsed.episodeNumber}`,
-            });
-          }
-        }
+        // if (episodeImages.stills) {
+        // for (const still of episodeImages.stills) {
+        //   images.push({
+        //     type: "snapshot",
+        //     url: (await this.tmdbClient.getImageURL(still.file_path))!,
+        //     alt: `${showDetails.name} - S${parsed.seasonNumber}E${parsed.episodeNumber}`,
+        //   });
+        // }
+        // }
         break;
       }
 
@@ -717,6 +719,8 @@ export class MetadataService {
                 showDetails.name,
                 showGuid,
                 showThumb || undefined,
+                undefined,
+                showDetails,
               ),
             ) || [];
 
@@ -847,6 +851,7 @@ export class MetadataService {
               seasonGuid,
               showThumb || undefined,
               undefined,
+              showDetails,
             ),
           ) || [];
 
@@ -933,6 +938,7 @@ export class MetadataService {
             seasonGuid,
             showThumb || undefined,
             undefined,
+            showDetails,
           ),
         ) || [];
 

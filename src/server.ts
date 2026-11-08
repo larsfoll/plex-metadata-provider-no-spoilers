@@ -18,7 +18,7 @@ try {
 
 const app = createApp();
 
-app.listen(config.server.port, "0.0.0.0", () => {
+app.listen(config.server.port, () => {
   console.log(`TMDB Example Provider listening on port ${config.server.port}`);
   console.log(
     `TV Provider available at: http://localhost:${config.server.port}/tv`,

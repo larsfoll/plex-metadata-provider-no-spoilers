@@ -688,7 +688,15 @@ export class TMDBMapper {
       const showThumb = this.getImageURL(tmdbShow.poster_path);
 
       const seasonMetadata = tmdbShow.seasons.map((season) =>
-        this.mapSeason(season, tmdbShow.id, tmdbShow.name, showGuid, showThumb),
+        this.mapSeason(
+          season,
+          tmdbShow.id,
+          tmdbShow.name,
+          showGuid,
+          showThumb,
+          undefined,
+          tmdbShow,
+        ),
       );
 
       metadata.Children = {
@@ -710,10 +718,13 @@ export class TMDBMapper {
     tvId: number,
     showTitle: string,
     showGuid: string,
-    showThumb?: string,
-    options?: {
-      includeChildren?: boolean;
-    },
+    showThumb: string | undefined,
+    options:
+      | {
+          includeChildren?: boolean;
+        }
+      | undefined,
+    showDetails: TMDBTVShow,
   ): SeasonMetadata {
     const ratingKey = `tmdb-season-${tvId}-${tmdbSeason.season_number}`;
     const parentRatingKey = `tmdb-show-${tvId}`;
@@ -815,6 +826,7 @@ export class TMDBMapper {
           seasonGuid,
           showThumb,
           seasonThumb,
+          showDetails,
         );
       });
 
@@ -837,8 +849,9 @@ export class TMDBMapper {
     showGuid: string,
     seasonTitle: string,
     seasonGuid: string,
-    showThumb?: string,
-    seasonThumb?: string,
+    showThumb: string | undefined,
+    seasonThumb: string | undefined,
+    showDetails: TMDBTVShow,
   ): EpisodeMetadata {
     const ratingKey = `tmdb-episode-${tvId}-${tmdbEpisode.season_number}-${tmdbEpisode.episode_number}`;
     const parentRatingKey = `tmdb-season-${tvId}-${tmdbEpisode.season_number}`;
@@ -849,6 +862,9 @@ export class TMDBMapper {
       ? tmdbEpisode.credits.crew
       : tmdbEpisode.crew;
     const crew = crewArray ? this.mapCrew(crewArray) : {};
+
+    const images = this.mapImages(showDetails);
+    const episodeImage = images?.find(({ type }) => type === "background");
 
     const metadata: EpisodeMetadata = {
       type: "episode",
@@ -880,7 +896,7 @@ export class TMDBMapper {
       grandparentTitle: showTitle,
       grandparentThumb: showThumb,
       Rating: [],
-      Image: [],
+      Image: episodeImage ? [episodeImage] : [],
     };
 
     // Add snapshot image

@@ -245,6 +245,7 @@ export class MatchService {
         showGuid,
         showThumb || undefined,
         { includeChildren: request.includeChildren === 1 },
+        showDetails,
       );
 
       matches.push(seasonMetadata);
@@ -337,6 +338,7 @@ export class MatchService {
           seasonGuid,
           showThumb || undefined,
           undefined,
+          showDetails,
         );
 
         matches.push(episodeMetadata);
@@ -379,6 +381,7 @@ export class MatchService {
               seasonGuid,
               showThumb || undefined,
               undefined,
+              showDetails,
             );
 
             matches.push(episodeMetadata);
