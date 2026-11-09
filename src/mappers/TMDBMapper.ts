@@ -65,7 +65,7 @@ export class TMDBMapper {
    * Map TMDB images to Plex Image array
    * Only includes one image of each type
    */
-  private mapImages(tmdbShow: TMDBTVShow): Image[] | undefined {
+  mapImages(tmdbShow: TMDBTVShow): Image[] | undefined {
     const images: Image[] = [];
 
     // Poster (coverPoster) - only one
@@ -896,7 +896,9 @@ export class TMDBMapper {
       grandparentTitle: showTitle,
       grandparentThumb: showThumb,
       Rating: [],
-      Image: episodeImage ? [episodeImage] : [],
+      Image: episodeImage
+        ? [episodeImage, { ...episodeImage, type: "snapshot" }]
+        : [],
     };
 
     // Add snapshot image
