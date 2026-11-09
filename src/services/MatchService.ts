@@ -128,9 +128,15 @@ export class MatchService {
 
     // If no match by GUID, search by title
     if (matches.length === 0 && request.title) {
+      const filename = request.filename;
+      const derivedYear = filename?.substring(
+        filename.lastIndexOf("(") + 1,
+        filename.lastIndexOf(")"),
+      );
+
       const searchResults = await this.tmdbClient.searchTVShows(request.title, {
         language: options.language,
-        year: request.year,
+        year: derivedYear ? parseInt(derivedYear) : request.year,
       });
 
       // Get detailed info for the top result(s)
