@@ -44,7 +44,6 @@ ENV PATH=/app/node_modules/.bin:$PATH
 
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=dev --chown=node:node /app/dist ./dist
-COPY --from=dev --chown=node:node /app/docs ./docs
 
 # Expose the port that the application listens on.
 EXPOSE 3000

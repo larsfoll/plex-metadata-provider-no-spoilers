@@ -14,10 +14,9 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "TMDB Example Provider API",
+      title: "TMDB Provider No Spoilers API",
       version: TV_PROVIDER_VERSION,
-      description:
-        "A Plex-compatible Custom Metadata Provider for TV shows using TheMovieDB.org API",
+      description: "A Plex-compatible Metadata Provider for TV shows",
       contact: {
         name: "API Support",
       },

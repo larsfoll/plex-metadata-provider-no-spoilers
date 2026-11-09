@@ -15,8 +15,8 @@ import { API_PATHS } from "../constants";
  * TV Provider configuration
  */
 export const TV_PROVIDER_IDENTIFIER =
-  "tv.plex.agents.custom.example.themoviedb.tv";
-export const TV_PROVIDER_TITLE = "TheMovieDB Example TV Provider";
+  "tv.plex.agents.custom.tmdb.tv.no-spoilers";
+export const TV_PROVIDER_TITLE = "The Movie Database No Spoilers TV Provider";
 export const TV_PROVIDER_VERSION = "1.0.0";
 export const TV_PROVIDER_BASE_PATH = "/tv";
 
